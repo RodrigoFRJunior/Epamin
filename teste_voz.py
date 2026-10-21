@@ -6,11 +6,12 @@ FREQUENCIA = 16000
 DURACAO = 5
 
 print("Carregando modelo de reconhcimento....")
-modelo = WhisperModel("base", device="cpu", compute_type="int8")
+modelo = WhisperModel("small", device="cpu", compute_type="int8")
 
 input("Pressione ENTER e prepare-se para falar....")
 
 print("Estou ouvindo! Fale agora.")
+
 
 audio = sd.rec(
     int(DURACAO * FREQUENCIA),
