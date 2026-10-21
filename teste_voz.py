@@ -34,11 +34,6 @@ def ouvir():
         for segmento in segmentos
     )
     
-    print("Você disse:", texto if texto else "(nenhuma fala reconhecida)")
+    print(texto if texto else "(nenhuma fala reconhecida)")
     
     return texto.lower().strip()
-
-input("Pressione ENTER para começar...")
-frase = ouvir()
-
-print("Texto devolvido pela função:", repr(frase))

@@ -1,6 +1,5 @@
-
 import subprocess
-
+from teste_voz import ouvir
 
 def abrir_calculadora():
     subprocess.Popen("calc.exe")
@@ -34,8 +33,9 @@ nome = input("Como você quer chamar seu assistente? ")
 print(f"Olá! Eu sou o {nome}.")
 
 while True:
-    comando = input("O que você quer que eu faça? ").lower().strip()
+    input("Pressione ENTER para falar....")
 
+    comando = ouvir()
     continuar = executar_comando(comando)
 
     if not continuar:
