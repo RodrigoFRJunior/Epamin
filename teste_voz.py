@@ -1,6 +1,7 @@
 import sounddevice as sd
 from scipy.io.wavfile import write
 from faster_whisper import WhisperModel
+import string
 
 FREQUENCIA = 16000
 DURACAO = 5
@@ -36,4 +37,5 @@ def ouvir():
     
     print(texto if texto else "(nenhuma fala reconhecida)")
     
-    return texto.lower().strip()
+    texto = texto.lower().translate(str.maketrans("", "", string.punctuation))
+    return texto.strip()
