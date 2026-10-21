@@ -8,28 +8,37 @@ DURACAO = 5
 print("Carregando modelo de reconhcimento....")
 modelo = WhisperModel("small", device="cpu", compute_type="int8")
 
-input("Pressione ENTER e prepare-se para falar....")
+def ouvir():
+    print("\nEstou ouvindo! Fale agora.")
+    
+    audio = sd.rec(
+        int(DURACAO * FREQUENCIA), 
+        samplerate=FREQUENCIA,
+        channels=1,
+        dtype="int16"
+    )
+    sd.wait()
+    
+    arquivo = "gravacao.wav"
+    write(arquivo, FREQUENCIA, audio)
+    
+    print("Reconhecendo sua fala...")
+    
+    segmentos, informacoes = modelo.transcribe(
+        arquivo,
+        language="pt"
+    )
+    
+    texto = " ".join(
+        segmento.text.strip()
+        for segmento in segmentos
+    )
+    
+    print("Você disse:", texto if texto else "(nenhuma fala reconhecida)")
+    
+    return texto.lower().strip()
 
-print("Estou ouvindo! Fale agora.")
+input("Pressione ENTER para começar...")
+frase = ouvir()
 
-
-audio = sd.rec(
-    int(DURACAO * FREQUENCIA),
-    samplerate=FREQUENCIA,
-    channels=1,
-    dtype="int16"
-)
-
-sd.wait()
-
-write("gravacao.wav", FREQUENCIA, audio)
-print("Áudio gravado! Reconhecendo sua fala...")
-
-segmentos, informacoes = modelo.transcribe(
-    "gravacao.wav",
-    language="pt"
-)
-
-texto= " ".join(segmento.text.strip() for segmento in segmentos)
-
-print("\nVocê disse:", texto if texto else "(nenhuma fala reconhecida)")
+print("Texto devolvido pela função:", repr(frase))
