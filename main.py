@@ -19,7 +19,7 @@ def executar_comando(comando):
         case "abrir paint" | "paint":
             abrir_paint()
 
-        case "sair":
+        case "sair" | "tchau" :
             print("Até logo!")
             return False
 
@@ -29,14 +29,21 @@ def executar_comando(comando):
     return True
 
 
-nome = input("Como você quer chamar seu assistente? ")
-print(f"Olá! Eu sou o {nome}.")
+FRASE_ATIVACAO = "epamin"
+print(f"Olá! Eu sou o {FRASE_ATIVACAO}.")
 
 while True:
-    input("Pressione ENTER para falar....")
-
-    comando = ouvir()
-    continuar = executar_comando(comando)
-
-    if not continuar:
-        break
+  print("\nAguardando a frase de ativação...")
+  
+  frase = ouvir()
+  
+  if FRASE_ATIVACAO in frase:
+      print("Assistente ativado! Diga seu comando.")
+      
+      comando = ouvir()
+      continuar = executar_comando(comando)
+      
+      if not continuar:
+          break
+      
+      print("Voltando ao modo de espera.")

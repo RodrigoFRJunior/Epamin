@@ -27,7 +27,8 @@ def ouvir():
     
     segmentos, informacoes = modelo.transcribe(
         arquivo,
-        language="pt"
+        language="pt",
+        initial_prompt="Epamin é o nome de um assistente virtual."
     )
     
     texto = " ".join(
