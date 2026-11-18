@@ -15,8 +15,6 @@ Window {
 
     title: "Epamin"
 
-    property string estado: "INVOCANDO"
-
     Shortcut {
         sequence: "Escape"
         onActivated: Qt.quit()
@@ -115,10 +113,6 @@ Window {
                 easing.type: Easing.OutCubic
             }
         }
-
-        ScriptAction {
-            script: janela.estado = "AGUARDANDO"
-        }
     }
 
     Component.onCompleted: invocacao.start()
@@ -129,8 +123,6 @@ Window {
 
         // FUNDO ESCURO TRANSLUCIDO
         Rectangle {
-            id: fundo
-
             anchors.fill: parent
             color: "#99030A16"
 
@@ -646,67 +638,6 @@ Window {
                         easing.type: Easing.InOutSine
                     }
                 }
-            }
-        }
-
-        // IDENTIDADE DISCRETA
-        Column {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.top: parent.top
-            anchors.topMargin: 28
-            spacing: 6
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "E P A M I N"
-                color: "#D5FCFF"
-                font.pixelSize: 20
-                font.letterSpacing: 9
-                font.weight: Font.Light
-            }
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "MANIFESTAÇÃO"
-                color: "#78C8E5"
-                font.pixelSize: 8
-                font.letterSpacing: 5
-            }
-        }
-
-        // ESTADO
-        Column {
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 28
-            spacing: 7
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                text: estado === "INVOCANDO"
-                    ? "DESPERTANDO"
-                    : "AGUARDANDO"
-
-                color: "#D5FCFF"
-                font.pixelSize: 11
-                font.letterSpacing: 5
-            }
-
-            Rectangle {
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: 72
-                height: 1
-                color: "#8BEFFF"
-                opacity: 0.7
-            }
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "EPAMIN"
-                color: "#5799BC"
-                font.pixelSize: 8
-                font.letterSpacing: 5
             }
         }
     }
