@@ -5,7 +5,8 @@ import QtQuick.Window 2.15
 Window {
     id: janela
 
-    visible: true
+    visible: false
+    property bool epaminAtivo: false
     visibility: Window.FullScreen
     color: "transparent"
 
@@ -14,6 +15,16 @@ Window {
            Qt.Tool
 
     title: "Epamin"
+
+    onEpaminAtivoChanged: {
+    if (epaminAtivo) {
+        visible = true
+        invocacao.restart()
+    } else {
+        invocacao.stop()
+        visible = false
+    }
+}
 
     Shortcut {
         sequence: "Escape"
@@ -115,7 +126,7 @@ Window {
         }
     }
 
-    Component.onCompleted: invocacao.start()
+
 
     Item {
         id: cena
@@ -242,12 +253,13 @@ Window {
                     }
                 }
 
-                RotationAnimation on rotation {
-                    from: 0
-                    to: 360
-                    duration: 100000
-                    loops: Animation.Infinite
-                }
+               RotationAnimation on rotation {
+                running: janela.visible
+                from: 0
+                to: 360
+                duration: 100000
+                loops: Animation.Infinite
+            }
             }
 
             // ANEL INTERMEDIARIO
@@ -349,6 +361,7 @@ Window {
                 }
 
                 RotationAnimation on rotation {
+                    running: janela.visible
                     from: 360
                     to: 0
                     duration: 72000
@@ -454,6 +467,7 @@ Window {
                 }
 
                 RotationAnimation on rotation {
+                    running: janela.visible
                     from: 0
                     to: 360
                     duration: 42000
@@ -469,6 +483,7 @@ Window {
                 opacity: 0
 
                 RotationAnimation on rotation {
+                    running: janela.visible
                     from: 0
                     to: 360
                     duration: 50000
