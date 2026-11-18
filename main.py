@@ -4,6 +4,8 @@ import webbrowser
 import sys
 import threading
 
+
+
 from pathlib import Path
 
 from PySide6.QtCore import (
@@ -20,7 +22,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 from teste_voz import ouvir
 from sistema.audio import reproduzir
 from interface.app import aplicar_blur_windows
-
+from sistema.interpretador import interpretar_comando
 
 # ==========================================
 # COMANDOS DO EPAMIN
@@ -43,32 +45,35 @@ def abrir_paint():
     print("Abrindo o Paint!")
 
 
+
 def executar_comando(comando):
 
-    match comando:
-        case "abrir calculadora" | "calculadora":
+    intencao = interpretar_comando(comando)
+
+    print(f"Intenção identificada: {intencao}")
+
+    match intencao:
+
+        case "abrir_calculadora":
             abrir_calculadora()
             return "calculadora", True
 
-        case "abrir jorge" | "jorge":
+        case "abrir_paint":
             abrir_paint()
             return "paint", True
 
-        case "aulas":
+        case "abrir_aulas":
             abrir_plano_aula()
             return "aulas", True
 
-        case "sair" | "tchau":
+        case "sair":
             print("Até logo!")
             return "encerramento", False
 
-        case "":
-            print("Não consegui entender o comando.")
+        case _:
+            print("Ainda não consegui interpretar esse comando.")
             return "nao_entendi", True
 
-        case _:
-            print("Ainda não conheço esse comando.")
-            return "nao_entendi", True
 
 
 # ==========================================
