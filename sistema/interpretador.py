@@ -4,7 +4,10 @@ import unicodedata
 from difflib import SequenceMatcher
 
 
-# Palavras que não alteram a intenção principal
+# ==========================================
+# PALAVRAS IGNORADAS
+# ==========================================
+
 PALAVRAS_IGNORADAS = {
     "abrir", "abre", "abra",
     "quero", "gostaria",
@@ -14,12 +17,21 @@ PALAVRAS_IGNORADAS = {
     "meus", "minhas",
     "acessar", "iniciar", "inicia",
     "inicie", "executar", "executa",
-    "poderia", "pode"
+    "poderia", "pode",
+    "colocar", "coloca", "coloque",
+    "iniciar", "inicie",
+    "jogar", "jogar", "rodar",
+    "entrar", "no", "na", "nos", "nas",
+    "aplicativo", "programa", "jogo"
 }
 
 
-# Intenções e suas palavras de referência
+# ==========================================
+# INTENÇÕES
+# ==========================================
+
 INTENCOES = {
+
     "abrir_calculadora": [
         ("calculadora",),
         ("conta",),
@@ -38,6 +50,67 @@ INTENCOES = {
         ("plano", "aula")
     ],
 
+    "abrir_league_of_legends": [
+        ("league", "of", "legends"),
+        ("league",),
+        ("lol",),
+        ("legends",)
+    ],
+
+    "abrir_valorant": [
+        ("valorant",),
+        ("valoran",)
+    ],
+
+    "abrir_rocket_league": [
+        ("rocket", "league"),
+        ("rocket",),
+        ("foguete",)
+    ],
+
+    "abrir_whatsapp": [
+        ("whatsapp",),
+        ("what", "sapp")
+    ],
+
+    "abrir_youtube": [
+        ("youtube",),
+        ("you", "tube")
+    ],
+
+    "abrir_steam": [
+        ("steam",),
+        ("sti",)
+    ],
+
+    "abrir_discord": [
+        ("discord",),
+        ("discor",)
+    ],
+
+    "abrir_vscode": [
+        ("vscode",),
+        ("visual", "studio", "code"),
+        ("code",)
+    ],
+
+    "abrir_spotify": [
+        ("spotify",),
+        ("spotfy",)
+    ],
+
+    "abrir_fortnite": [
+        ("fortnite",),
+        ("fort", "nite")
+    ],
+
+    "abrir_gta": [
+        ("gta",),
+        ("grand", "theft", "auto"),
+        ("grand", "theft"),
+        ("gta", "cinco")
+    ],
+
     "sair": [
         ("sair",),
         ("tchau",),
@@ -48,23 +121,30 @@ INTENCOES = {
 }
 
 
+# ==========================================
+# NORMALIZAÇÃO
+# ==========================================
+
 def normalizar(texto):
+
     texto = texto.lower()
 
-    # Remove acentos
     texto = unicodedata.normalize("NFD", texto)
+
     texto = "".join(
         caractere
         for caractere in texto
         if unicodedata.category(caractere) != "Mn"
     )
 
-    # Remove pontuação
-    texto = re.sub(r"[^a-z0-9\s]", " ", texto)
+    texto = re.sub(
+        r"[^a-z0-9\s]",
+        " ",
+        texto
+    )
 
     palavras = texto.split()
 
-    # Remove palavras auxiliares
     palavras = [
         palavra
         for palavra in palavras
@@ -74,7 +154,12 @@ def normalizar(texto):
     return palavras
 
 
+# ==========================================
+# SIMILARIDADE
+# ==========================================
+
 def similaridade(palavra1, palavra2):
+
     return SequenceMatcher(
         None,
         palavra1,
@@ -97,9 +182,14 @@ def comparar_intencao(palavras_usuario, referencia):
                 palavra_usuario
             )
 
-            limite = 0.78 if len(palavra_referencia) >= 5 else 0.85
+            limite = (
+                0.78
+                if len(palavra_referencia) >= 5
+                else 0.85
+            )
 
             if pontuacao >= limite:
+
                 melhor_pontuacao = max(
                     melhor_pontuacao,
                     pontuacao
@@ -108,10 +198,16 @@ def comparar_intencao(palavras_usuario, referencia):
         if melhor_pontuacao == 0:
             return 0
 
-        pontuacoes.append(melhor_pontuacao)
+        pontuacoes.append(
+            melhor_pontuacao
+        )
 
     return sum(pontuacoes) / len(pontuacoes)
 
+
+# ==========================================
+# INTERPRETADOR
+# ==========================================
 
 def interpretar_comando(texto):
 
@@ -139,6 +235,7 @@ def interpretar_comando(texto):
             )
 
         if melhor_pontuacao > 0:
+
             resultados.append(
                 (intencao, melhor_pontuacao)
             )
@@ -151,8 +248,6 @@ def interpretar_comando(texto):
         reverse=True
     )
 
-    # Evita escolher uma intenção quando duas são
-    # praticamente igualmente prováveis.
     if (
         len(resultados) > 1
         and resultados[0][1] - resultados[1][1] < 0.08

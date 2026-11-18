@@ -21,7 +21,7 @@ from teste_voz import ouvir
 from sistema.audio import reproduzir
 from interface.app import aplicar_blur_windows
 from sistema.interpretador import interpretar_comando
-
+from sistema.aplicativos import abrir_aplicativo
 
 # ==========================================
 # COMANDOS DO EPAMIN
@@ -68,6 +68,50 @@ def executar_comando(comando):
             print("Até logo!")
             return "encerramento", False
 
+        case "abrir_league_of_legends":
+            sucesso = abrir_aplicativo("league_of_legends")
+            return ("league_of_legends" if sucesso else "nao_entendi"), True
+
+        case "abrir_valorant":
+            sucesso = abrir_aplicativo("valorant")
+            return ("valorant" if sucesso else "nao_entendi"), True
+
+        case "abrir_rocket_league":
+            sucesso = abrir_aplicativo("rocket_league")
+            return ("rocket_league" if sucesso else "nao_entendi"), True
+
+        case "abrir_whatsapp":
+            sucesso = abrir_aplicativo("whatsapp")
+            return ("whatsapp" if sucesso else "nao_entendi"), True
+
+        case "abrir_youtube":
+            sucesso = abrir_aplicativo("youtube")
+            return ("youtube" if sucesso else "nao_entendi"), True
+
+        case "abrir_steam":
+            sucesso = abrir_aplicativo("steam")
+            return ("steam" if sucesso else "nao_entendi"), True
+
+        case "abrir_discord":
+            sucesso = abrir_aplicativo("discord")
+            return ("discord" if sucesso else "nao_entendi"), True
+
+        case "abrir_vscode":
+            sucesso = abrir_aplicativo("vscode")
+            return ("vscode" if sucesso else "nao_entendi"), True
+
+        case "abrir_spotify":
+            sucesso = abrir_aplicativo("spotify")
+            return ("spotify" if sucesso else "nao_entendi"), True
+
+        case "abrir_fortnite":
+            sucesso = abrir_aplicativo("fortnite")
+            return ("fortnite" if sucesso else "nao_entendi"), True
+
+        case "abrir_gta":
+            sucesso = abrir_aplicativo("gta_v")
+            return ("gta_v" if sucesso else "nao_entendi"), True
+        
         case _:
             print("Ainda não consegui interpretar esse comando.")
             return "nao_entendi", True
