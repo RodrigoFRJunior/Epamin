@@ -7,6 +7,8 @@ Window {
 
     visible: false
     property bool epaminAtivo: false
+    property string estadoEpamin: "repouso"
+
     visibility: Window.FullScreen
     color: "transparent"
 
@@ -17,21 +19,33 @@ Window {
     title: "Epamin"
 
     onEpaminAtivoChanged: {
-    if (epaminAtivo) {
-        visible = true
-        invocacao.restart()
-    } else {
-        invocacao.stop()
-        visible = false
+        if (epaminAtivo) {
+            desmaterializacao.stop()
+
+            cena.opacity = 1
+            sistema.scale = 1
+
+            visible = true
+            estadoEpamin = "ativacao"
+
+            invocacao.restart()
+        } else {
+            estadoEpamin = "repouso"
+
+            invocacao.stop()
+            desmaterializacao.restart()
+        }
     }
-}
 
     Shortcut {
         sequence: "Escape"
         onActivated: Qt.quit()
     }
 
+    // ==========================================
     // INVOCACAO PROGRESSIVA
+    // ==========================================
+
     SequentialAnimation {
         id: invocacao
 
@@ -41,7 +55,7 @@ Window {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 1200
+                duration: 450
             }
 
             NumberAnimation {
@@ -49,12 +63,14 @@ Window {
                 property: "scale"
                 from: 0.75
                 to: 1
-                duration: 1500
+                duration: 500
                 easing.type: Easing.OutCubic
             }
         }
 
-        PauseAnimation { duration: 200 }
+        PauseAnimation {
+            duration: 80
+        }
 
         ParallelAnimation {
             NumberAnimation {
@@ -62,7 +78,7 @@ Window {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 900
+                duration: 350
             }
 
             NumberAnimation {
@@ -70,12 +86,14 @@ Window {
                 property: "scale"
                 from: 0.7
                 to: 1
-                duration: 1100
+                duration: 400
                 easing.type: Easing.OutBack
             }
         }
 
-        PauseAnimation { duration: 200 }
+        PauseAnimation {
+            duration: 80
+        }
 
         ParallelAnimation {
             NumberAnimation {
@@ -83,7 +101,7 @@ Window {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 850
+                duration: 350
             }
 
             NumberAnimation {
@@ -91,12 +109,14 @@ Window {
                 property: "scale"
                 from: 0.6
                 to: 1
-                duration: 1000
+                duration: 400
                 easing.type: Easing.OutBack
             }
         }
 
-        PauseAnimation { duration: 250 }
+        PauseAnimation {
+            duration: 100
+        }
 
         ParallelAnimation {
             NumberAnimation {
@@ -104,7 +124,7 @@ Window {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 1000
+                duration: 500
             }
 
             NumberAnimation {
@@ -112,7 +132,7 @@ Window {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 1200
+                duration: 500
             }
 
             NumberAnimation {
@@ -120,17 +140,51 @@ Window {
                 property: "scale"
                 from: 0.2
                 to: 1
-                duration: 1400
+                duration: 500
                 easing.type: Easing.OutCubic
             }
         }
     }
 
+    // ==========================================
+    // DESMATERIALIZACAO
+    // ==========================================
 
+    ParallelAnimation {
+        id: desmaterializacao
+
+        NumberAnimation {
+            target: cena
+            property: "opacity"
+            to: 0
+            duration: 450
+            easing.type: Easing.InCubic
+        }
+
+        NumberAnimation {
+            target: sistema
+            property: "scale"
+            to: 0.88
+            duration: 450
+            easing.type: Easing.InCubic
+        }
+
+        onFinished: {
+            if (!janela.epaminAtivo) {
+                janela.visible = false
+            }
+        }
+    }
+
+    // ==========================================
+    // CENA PRINCIPAL
+    // ==========================================
 
     Item {
         id: cena
+
         anchors.fill: parent
+        opacity: 1
 
         // FUNDO ESCURO TRANSLUCIDO
         Rectangle {
@@ -159,7 +213,10 @@ Window {
             }
         }
 
+        // ======================================
         // SELO CENTRAL
+        // ======================================
+
         Item {
             id: sistema
 
@@ -167,7 +224,12 @@ Window {
             height: 680
             anchors.centerIn: parent
 
+            scale: 1
+
+            // ==================================
             // ANEL EXTERNO
+            // ==================================
+
             Item {
                 id: anelExterno
 
@@ -253,16 +315,23 @@ Window {
                     }
                 }
 
-               RotationAnimation on rotation {
-                running: janela.visible
-                from: 0
-                to: 360
-                duration: 100000
-                loops: Animation.Infinite
-            }
+                RotationAnimation on rotation {
+                    running: janela.visible
+
+                    from: 0
+                    to: 360
+
+                    duration: janela.estadoEpamin === "execucao" ? 18000 :
+                              janela.estadoEpamin === "escuta" ? 45000 : 100000
+
+                    loops: Animation.Infinite
+                }
             }
 
+            // ==================================
             // ANEL INTERMEDIARIO
+            // ==================================
+
             Item {
                 id: anelMedio
 
@@ -362,14 +431,21 @@ Window {
 
                 RotationAnimation on rotation {
                     running: janela.visible
+
                     from: 360
                     to: 0
-                    duration: 72000
+
+                    duration: janela.estadoEpamin === "execucao" ? 16000 :
+                              janela.estadoEpamin === "escuta" ? 35000 : 72000
+
                     loops: Animation.Infinite
                 }
             }
 
+            // ==================================
             // ANEL INTERNO
+            // ==================================
+
             Item {
                 id: anelInterno
 
@@ -468,14 +544,21 @@ Window {
 
                 RotationAnimation on rotation {
                     running: janela.visible
+
                     from: 0
                     to: 360
-                    duration: 42000
+
+                    duration: janela.estadoEpamin === "execucao" ? 12000 :
+                              janela.estadoEpamin === "escuta" ? 25000 : 42000
+
                     loops: Animation.Infinite
                 }
             }
 
+            // ==================================
             // PARTICULAS
+            // ==================================
+
             Item {
                 id: particulas
 
@@ -484,8 +567,10 @@ Window {
 
                 RotationAnimation on rotation {
                     running: janela.visible
+
                     from: 0
                     to: 360
+
                     duration: 50000
                     loops: Animation.Infinite
                 }
@@ -515,6 +600,7 @@ Window {
                             color: "#C4FAFF"
 
                             SequentialAnimation on opacity {
+                                running: janela.visible
                                 loops: Animation.Infinite
 
                                 NumberAnimation {
@@ -532,7 +618,10 @@ Window {
                 }
             }
 
+            // ==================================
             // NUCLEO ENERGETICO
+            // ==================================
+
             Item {
                 id: nucleo
 
@@ -582,6 +671,7 @@ Window {
                         opacity: 0.4
 
                         SequentialAnimation on scale {
+                            running: janela.visible
                             loops: Animation.Infinite
 
                             PauseAnimation {
@@ -597,6 +687,7 @@ Window {
                         }
 
                         SequentialAnimation on opacity {
+                            running: janela.visible
                             loops: Animation.Infinite
 
                             PauseAnimation {
@@ -639,17 +730,22 @@ Window {
                 }
 
                 SequentialAnimation on scale {
+                    running: janela.visible
                     loops: Animation.Infinite
 
                     NumberAnimation {
-                        to: 1.07
-                        duration: 2100
+                        to: janela.estadoEpamin === "execucao" ? 1.14 :
+                            janela.estadoEpamin === "escuta" ? 1.08 : 1.04
+
+                        duration: janela.estadoEpamin === "execucao" ? 650 : 1800
                         easing.type: Easing.InOutSine
                     }
 
                     NumberAnimation {
-                        to: 0.94
-                        duration: 2100
+                        to: janela.estadoEpamin === "execucao" ? 0.94 :
+                            janela.estadoEpamin === "escuta" ? 0.96 : 0.98
+
+                        duration: janela.estadoEpamin === "execucao" ? 650 : 1800
                         easing.type: Easing.InOutSine
                     }
                 }

@@ -13,6 +13,7 @@ from PySide6.QtCore import (
     Slot,
     QObject
 )
+
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
@@ -187,6 +188,10 @@ class Controlador(QObject):
         self.fala_thread = None
         self.proxima_acao = None
 
+    def definir_estado(self, estado):
+        self.janela.setProperty("estadoEpamin", estado)
+        print(f"Estado do Epamin: {estado}")
+
     def iniciar_fala(self, audio, proxima_acao):
 
         self.proxima_acao = proxima_acao
@@ -205,6 +210,7 @@ class Controlador(QObject):
         print("Manifestando interface...")
 
         self.janela.setProperty("epaminAtivo", True)
+        self.definir_estado("ativacao")
 
         self.iniciar_fala(
             "ativacao",
@@ -215,6 +221,8 @@ class Controlador(QObject):
     def processar_comando(self, comando):
 
         print(f"Comando recebido: {comando}")
+
+        self.definir_estado("execucao")
 
         audio, continuar = executar_comando(comando)
 
@@ -235,18 +243,23 @@ class Controlador(QObject):
 
         if acao == "continuar":
 
-            # A saudação terminou.
-            # Agora podemos ouvir o comando.
+            # Saudacao concluida.
+            # Agora o Epamin começa a escutar.
+            self.definir_estado("escuta")
+
             self.escuta.liberar_escuta()
 
         elif acao == "voltar_espera":
 
+            # Resposta concluida.
+            # A interface começa a desaparecer.
             self.janela.setProperty("epaminAtivo", False)
 
             self.escuta.liberar_escuta()
 
         elif acao == "encerrar":
 
+            # Encerramento do assistente.
             self.janela.setProperty("epaminAtivo", False)
 
             self.escuta.parar()
@@ -263,7 +276,7 @@ class Controlador(QObject):
 # ==========================================
 
 def iniciar_epamin():
-
+    print("TESTE: NOVO MAIN.PY CARREGADO")
     aplicativo = QGuiApplication(sys.argv)
     aplicativo.setApplicationName("Epamin")
 
