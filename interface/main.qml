@@ -15,20 +15,132 @@ Window {
 
     title: "Epamin"
 
+    property color azul: "#39CFFF"
+    property color ciano: "#9AF5FF"
+    property color azulEscuro: "#087CA8"
+
+    // ESTADOS DA INTERFACE
+    property string estado: "INVOCANDO"
+
     Shortcut {
         sequence: "Escape"
         onActivated: Qt.quit()
     }
 
-    property color azul: "#39CFFF"
-    property color ciano: "#9AF5FF"
-    property color azulEscuro: "#087CA8"
+    // ANIMAÇÃO DE INVOCACÃO
+    SequentialAnimation {
+        id: invocacao
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: anelExterno
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 900
+            }
+
+            NumberAnimation {
+                target: anelExterno
+                property: "scale"
+                from: 0.65
+                to: 1
+                duration: 1100
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        PauseAnimation {
+            duration: 180
+        }
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: anelIntermediario
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 750
+            }
+
+            NumberAnimation {
+                target: anelIntermediario
+                property: "scale"
+                from: 0.65
+                to: 1
+                duration: 900
+                easing.type: Easing.OutBack
+            }
+        }
+
+        PauseAnimation {
+            duration: 150
+        }
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: anelInterno
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 650
+            }
+
+            NumberAnimation {
+                target: anelInterno
+                property: "scale"
+                from: 0.5
+                to: 1
+                duration: 800
+                easing.type: Easing.OutBack
+            }
+        }
+
+        PauseAnimation {
+            duration: 200
+        }
+
+        ParallelAnimation {
+            NumberAnimation {
+                target: nucleo
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 1000
+            }
+
+            NumberAnimation {
+                target: nucleo
+                property: "scale"
+                from: 0.2
+                to: 1
+                duration: 1100
+                easing.type: Easing.OutElastic
+            }
+
+            NumberAnimation {
+                target: particulas
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 1000
+            }
+        }
+
+        ScriptAction {
+            script: janela.estado = "AGUARDANDO"
+        }
+    }
+
+    Component.onCompleted: {
+        invocacao.start()
+    }
 
     Item {
         id: interface
         anchors.fill: parent
 
-        // Centro da composição
+        // NÚCLEO HOLOGRÁFICO
         Item {
             id: sistemaCentral
 
@@ -36,12 +148,16 @@ Window {
             height: 620
             anchors.centerIn: parent
 
-            // CAMADA 1 - ANEL EXTERNO
+            // ANEL EXTERNO
             Item {
                 id: anelExterno
+
                 width: 610
                 height: 610
                 anchors.centerIn: parent
+
+                opacity: 0
+                scale: 0.65
 
                 Canvas {
                     anchors.fill: parent
@@ -63,7 +179,6 @@ Window {
                         ctx.arc(cx, cy, 285, 0, Math.PI * 2)
                         ctx.stroke()
 
-                        // Marcações externas
                         for (var i = 0; i < 120; i++) {
                             var angulo = i * Math.PI / 60
                             var raio1 = i % 5 === 0 ? 270 : 278
@@ -86,12 +201,15 @@ Window {
                             ctx.stroke()
                         }
 
-                        // Segmentos luminosos
                         for (var j = 0; j < 8; j++) {
                             var inicio = j * Math.PI / 4
+
                             ctx.beginPath()
-                            ctx.arc(cx, cy, 302,
-                                    inicio, inicio + 0.22)
+                            ctx.arc(
+                                cx, cy, 302,
+                                inicio, inicio + 0.22
+                            )
+
                             ctx.strokeStyle = "#54DFFF"
                             ctx.lineWidth = 3
                             ctx.stroke()
@@ -107,13 +225,16 @@ Window {
                 }
             }
 
-            // CAMADA 2 - ANEL INTERMEDIÁRIO
+            // ANEL INTERMEDIÁRIO
             Item {
                 id: anelIntermediario
 
                 width: 470
                 height: 470
                 anchors.centerIn: parent
+
+                opacity: 0
+                scale: 0.65
 
                 Canvas {
                     anchors.fill: parent
@@ -136,7 +257,6 @@ Window {
                         ctx.arc(cx, cy, 205, 0, Math.PI * 2)
                         ctx.stroke()
 
-                        // Arcos segmentados
                         for (var i = 0; i < 12; i++) {
                             var inicio = i * Math.PI / 6
 
@@ -151,7 +271,6 @@ Window {
                             ctx.stroke()
                         }
 
-                        // Pequenas marcações internas
                         for (var j = 0; j < 72; j++) {
                             var angulo = j * Math.PI / 36
 
@@ -180,13 +299,16 @@ Window {
                 }
             }
 
-            // CAMADA 3 - ANEL INTERNO
+            // ANEL INTERNO
             Item {
                 id: anelInterno
 
                 width: 340
                 height: 340
                 anchors.centerIn: parent
+
+                opacity: 0
+                scale: 0.5
 
                 Canvas {
                     anchors.fill: parent
@@ -209,9 +331,9 @@ Window {
                         ctx.arc(cx, cy, 140, 0, Math.PI * 2)
                         ctx.stroke()
 
-                        // Elementos geométricos
                         for (var i = 0; i < 24; i++) {
                             var angulo = i * Math.PI / 12
+
                             var x1 = cx + Math.cos(angulo) * 125
                             var y1 = cy + Math.sin(angulo) * 125
                             var x2 = cx + Math.cos(angulo) * 155
@@ -236,39 +358,46 @@ Window {
                 }
             }
 
-            // PARTÍCULAS ORBITAIS
-            Repeater {
-                model: 36
+            // PARTÍCULAS
+            Item {
+                id: particulas
+                anchors.fill: parent
+                opacity: 0
 
-                Rectangle {
-                    property real angulo: index * 10
-                    property real distancia: 245 + (index % 4) * 9
+                Repeater {
+                    model: 36
 
-                    width: index % 3 === 0 ? 4 : 2
-                    height: width
-                    radius: width / 2
+                    Rectangle {
+                        property real angulo: index * 10
+                        property real distancia: 245 + (index % 4) * 9
 
-                    color: index % 2 === 0 ? "#B8F8FF" : "#35CFFF"
+                        width: index % 3 === 0 ? 4 : 2
+                        height: width
+                        radius: width / 2
 
-                    x: sistemaCentral.width / 2 +
-                       Math.cos(angulo * Math.PI / 180) * distancia -
-                       width / 2
+                        color: index % 2 === 0
+                               ? "#B8F8FF" : "#35CFFF"
 
-                    y: sistemaCentral.height / 2 +
-                       Math.sin(angulo * Math.PI / 180) * distancia -
-                       height / 2
+                        x: sistemaCentral.width / 2 +
+                           Math.cos(angulo * Math.PI / 180) * distancia -
+                           width / 2
 
-                    SequentialAnimation on opacity {
-                        loops: Animation.Infinite
+                        y: sistemaCentral.height / 2 +
+                           Math.sin(angulo * Math.PI / 180) * distancia -
+                           height / 2
 
-                        NumberAnimation {
-                            to: 0.95
-                            duration: 700 + index * 40
-                        }
+                        SequentialAnimation on opacity {
+                            loops: Animation.Infinite
 
-                        NumberAnimation {
-                            to: 0.15
-                            duration: 700 + index * 40
+                            NumberAnimation {
+                                to: 0.95
+                                duration: 700 + index * 40
+                            }
+
+                            NumberAnimation {
+                                to: 0.15
+                                duration: 700 + index * 40
+                            }
                         }
                     }
                 }
@@ -277,11 +406,13 @@ Window {
             // NÚCLEO CENTRAL
             Item {
                 id: nucleo
+
                 width: 150
                 height: 150
                 anchors.centerIn: parent
 
-                // Halo externo
+                opacity: 0
+
                 Rectangle {
                     anchors.centerIn: parent
                     width: 150
@@ -291,7 +422,6 @@ Window {
                     opacity: 0.15
                 }
 
-                // Camada luminosa
                 Rectangle {
                     anchors.centerIn: parent
                     width: 120
@@ -303,7 +433,6 @@ Window {
                     border.width: 2
                 }
 
-                // Núcleo interno
                 Rectangle {
                     anchors.centerIn: parent
                     width: 82
@@ -315,10 +444,12 @@ Window {
                             position: 0.0
                             color: "#B7FAFF"
                         }
+
                         GradientStop {
                             position: 0.35
                             color: "#36CFFF"
                         }
+
                         GradientStop {
                             position: 1.0
                             color: "#075A9D"
@@ -456,7 +587,10 @@ Window {
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "AGUARDANDO INSTRUÇÕES"
+                text: estado === "INVOCANDO"
+                      ? "INICIALIZANDO SISTEMA"
+                      : "AGUARDANDO INSTRUÇÕES"
+
                 color: "#A6F2FF"
                 font.pixelSize: 12
                 font.letterSpacing: 3
@@ -464,7 +598,7 @@ Window {
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "E P A M I N   //   VERSION 0.2"
+                text: "E P A M I N   //   VERSION 0.3"
                 color: "#397FA9"
                 font.pixelSize: 9
                 font.letterSpacing: 2
