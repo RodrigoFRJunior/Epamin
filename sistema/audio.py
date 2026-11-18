@@ -13,6 +13,17 @@ AUDIOS = {
     "nao_entendi": "nao_entendi.mp3",
     "encerramento": "encerramento.mp3",
     "modo_espera": "modo_espera.mp3",
+    "league_of_legends": "league_of_legends.mp3",
+    "valorant": "valorant.mp3",
+    "rocket_league": "rocket_league.mp3",
+    "whatsapp": "whatsapp.mp3",
+    "youtube": "youtube.mp3",
+    "steam": "steam.mp3",
+    "discord": "discord.mp3",
+    "vscode": "vscode.mp3",
+    "spotify": "spotify.mp3",
+    "fortnite": "fortnite.mp3",
+    "gta_v": "gta_v.mp3",
 }
 
 
