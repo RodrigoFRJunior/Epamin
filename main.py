@@ -4,8 +4,6 @@ import webbrowser
 import sys
 import threading
 
-
-
 from pathlib import Path
 
 from PySide6.QtCore import (
@@ -23,6 +21,7 @@ from teste_voz import ouvir
 from sistema.audio import reproduzir
 from interface.app import aplicar_blur_windows
 from sistema.interpretador import interpretar_comando
+
 
 # ==========================================
 # COMANDOS DO EPAMIN
@@ -43,7 +42,6 @@ def abrir_calculadora():
 def abrir_paint():
     subprocess.Popen("mspaint.exe")
     print("Abrindo o Paint!")
-
 
 
 def executar_comando(comando):
@@ -75,7 +73,6 @@ def executar_comando(comando):
             return "nao_entendi", True
 
 
-
 # ==========================================
 # SISTEMA DE REPRODUÇÃO
 # ==========================================
@@ -91,7 +88,7 @@ class FalaEpamin(QThread):
 
 
 # ==========================================
-# SISTEMA DE ESCUTA
+# SISTEMA DE ATIVAÇÃO
 # ==========================================
 
 FRASE_ATIVACAO = "epamin"
@@ -101,6 +98,7 @@ def reconhecer_ativacao(frase):
 
     alternativas = [
         "epamin",
+        "epaminondas",
         "e para mim",
         "epamine",
         "epámin"
@@ -111,6 +109,10 @@ def reconhecer_ativacao(frase):
         for alternativa in alternativas
     )
 
+
+# ==========================================
+# SISTEMA DE ESCUTA
+# ==========================================
 
 class EscutaEpamin(QThread):
 
@@ -148,6 +150,8 @@ class EscutaEpamin(QThread):
         while self.executando:
 
             try:
+
+                # Aguarda a palavra de ativação
                 frase = ouvir()
 
                 if not self.executando:
@@ -157,32 +161,40 @@ class EscutaEpamin(QThread):
 
                     print("Epamin ativado!")
 
+                    # Prepara a sincronização com a saudação
                     self.liberacao.clear()
+
+                    # Solicita a ativação da interface
                     self.ativado.emit()
 
+                    # Captura o comando enquanto a saudação toca
+                    print("Capturando comando durante a saudação...")
+
+                    comando = ouvir(tempo_espera=15)
+
+                    if not self.executando:
+                        break
+
+                    print(f"Comando capturado: {comando!r}")
+
+                    # Aguarda a saudação terminar
                     if not self.aguardar_liberacao():
                         break
 
                     if not self.executando:
                         break
 
-                    print("Diga seu comando.")
-
-                    comando = ouvir()
-
-                    if not self.executando:
-                        break
-
+                    # Prepara a sincronização da resposta
                     self.liberacao.clear()
+
+                    # Envia o comando para o controlador
                     self.comando_recebido.emit(comando)
 
+                    # Aguarda o processamento e a resposta
                     if not self.aguardar_liberacao():
                         break
 
                     if not self.executando:
-                        break
-
-                    if comando in ("sair", "tchau"):
                         break
 
                     print("Voltando ao modo de espera...")
@@ -208,16 +220,18 @@ class Controlador(QObject):
         self.fala_thread = None
         self.proxima_acao = None
 
-        # Impede ativações e respostas duplicadas
         self.ocupado = False
 
     def definir_estado(self, estado):
+
         self.janela.setProperty("estadoEpamin", estado)
+
         print(f"Estado do Epamin: {estado}")
 
     def iniciar_fala(self, audio, proxima_acao):
 
         if self.fala_thread is not None and self.fala_thread.isRunning():
+
             print("Reprodução já em andamento. Solicitação ignorada.")
             return False
 
@@ -245,6 +259,7 @@ class Controlador(QObject):
         print("Manifestando interface...")
 
         self.janela.setProperty("epaminAtivo", True)
+
         self.definir_estado("ativacao")
 
         self.iniciar_fala(
@@ -283,6 +298,8 @@ class Controlador(QObject):
         if acao == "continuar":
 
             self.definir_estado("escuta")
+
+            # Libera a sincronização da captura
             self.escuta.liberar_escuta()
 
         elif acao == "voltar_espera":
@@ -304,6 +321,7 @@ class Controlador(QObject):
 
             self.janela.setProperty("epaminAtivo", False)
 
+            # Retorna ao reconhecimento da ativação
             self.escuta.liberar_escuta()
 
         elif acao == "encerrar":
@@ -313,6 +331,7 @@ class Controlador(QObject):
             self.janela.setProperty("epaminAtivo", False)
 
             self.escuta.parar()
+
             self.aplicativo.quit()
 
     @Slot(str)
@@ -327,9 +346,10 @@ class Controlador(QObject):
 
 def iniciar_epamin():
 
-    print("TESTE: NOVO MAIN.PY CARREGADO")
+    print("EPAMIN: iniciando sistema...")
 
     aplicativo = QGuiApplication(sys.argv)
+
     aplicativo.setApplicationName("Epamin")
 
     engine = QQmlApplicationEngine()
@@ -343,7 +363,9 @@ def iniciar_epamin():
     engine.load(QUrl.fromLocalFile(str(arquivo_qml)))
 
     if not engine.rootObjects():
+
         print("Erro ao carregar a interface do Epamin.")
+
         return 1
 
     janela = engine.rootObjects()[0]
@@ -358,7 +380,9 @@ def iniciar_epamin():
         escuta
     )
 
-    escuta.ativado.connect(controlador.ativar)
+    escuta.ativado.connect(
+        controlador.ativar
+    )
 
     escuta.comando_recebido.connect(
         controlador.processar_comando
