@@ -16,71 +16,71 @@ Window {
     title: "Epamin"
 
     property string estado: "INVOCANDO"
-    property color luz: "#83EFFF"
-    property color azul: "#35BCEB"
-    property color profundo: "#176EBA"
 
     Shortcut {
         sequence: "Escape"
         onActivated: Qt.quit()
     }
 
-    // INVOCACAO DOS ELEMENTOS
+    // INVOCACAO PROGRESSIVA
     SequentialAnimation {
         id: invocacao
 
         ParallelAnimation {
             NumberAnimation {
-                target: circuloExterno
+                target: anelExterno
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 1100
+                duration: 1200
             }
+
             NumberAnimation {
-                target: circuloExterno
+                target: anelExterno
                 property: "scale"
-                from: 0.72
+                from: 0.75
                 to: 1
-                duration: 1400
+                duration: 1500
                 easing.type: Easing.OutCubic
             }
         }
 
-        PauseAnimation { duration: 180 }
+        PauseAnimation { duration: 200 }
 
         ParallelAnimation {
             NumberAnimation {
-                target: circuloMedio
+                target: anelMedio
                 property: "opacity"
                 from: 0
                 to: 1
                 duration: 900
             }
+
             NumberAnimation {
-                target: circuloMedio
+                target: anelMedio
                 property: "scale"
-                from: 0.65
+                from: 0.7
                 to: 1
                 duration: 1100
                 easing.type: Easing.OutBack
             }
         }
 
-        PauseAnimation { duration: 180 }
+        PauseAnimation { duration: 200 }
 
         ParallelAnimation {
             NumberAnimation {
-                target: circuloInterno
+                target: anelInterno
                 property: "opacity"
                 from: 0
                 to: 1
                 duration: 850
             }
+
             NumberAnimation {
-                target: circuloInterno
+                target: anelInterno
                 property: "scale"
-                from: 0.55
+                from: 0.6
                 to: 1
                 duration: 1000
                 easing.type: Easing.OutBack
@@ -97,6 +97,7 @@ Window {
                 to: 1
                 duration: 1000
             }
+
             NumberAnimation {
                 target: nucleo
                 property: "opacity"
@@ -104,13 +105,14 @@ Window {
                 to: 1
                 duration: 1200
             }
+
             NumberAnimation {
                 target: nucleo
                 property: "scale"
-                from: 0.1
+                from: 0.2
                 to: 1
                 duration: 1400
-                easing.type: Easing.OutElastic
+                easing.type: Easing.OutCubic
             }
         }
 
@@ -125,24 +127,50 @@ Window {
         id: cena
         anchors.fill: parent
 
-        // COMPOSICAO CENTRAL
-        Item {
-            id: circuloPrincipal
+        // FUNDO ESCURO TRANSLUCIDO
+        Rectangle {
+            id: fundo
 
-            width: 690
-            height: 690
+            anchors.fill: parent
+            color: "#99030A16"
+
+            Rectangle {
+                anchors.fill: parent
+
+                gradient: Gradient {
+                    GradientStop {
+                        position: 0
+                        color: "#33020A18"
+                    }
+
+                    GradientStop {
+                        position: 0.5
+                        color: "#00030A16"
+                    }
+
+                    GradientStop {
+                        position: 1
+                        color: "#55020A18"
+                    }
+                }
+            }
+        }
+
+        // SELO CENTRAL
+        Item {
+            id: sistema
+
+            width: 680
+            height: 680
             anchors.centerIn: parent
 
-            // CIRCULO EXTERNO: GRANDE SELO ARCANO
+            // ANEL EXTERNO
             Item {
-                id: circuloExterno
+                id: anelExterno
 
-                width: 680
-                height: 680
-                anchors.centerIn: parent
-
+                anchors.fill: parent
                 opacity: 0
-                scale: 0.72
+                scale: 0.75
 
                 Canvas {
                     anchors.fill: parent
@@ -162,17 +190,18 @@ Window {
                             ctx.stroke()
                         }
 
-                        circle(330, "#347FBD", 1.2)
-                        circle(318, "#83EFFF", 1.5)
-                        circle(310, "#286DA9", 1)
-                        circle(298, "#5BCDF1", 1.4)
+                        circle(330, "#438CBF", 1)
+                        circle(318, "#8CEEFF", 1.5)
+                        circle(306, "#347BAE", 0.8)
+                        circle(294, "#63CDEB", 1.2)
 
-                        // DIVISORES RADIAIS
-                        for (var i = 0; i < 144; i++) {
-                            var a = i * Math.PI / 72
-                            var major = i % 6 === 0
-                            var r1 = major ? 298 : 306
-                            var r2 = major ? 326 : 313
+                        // MARCACOES GEOMETRICAS
+                        for (var i = 0; i < 120; i++) {
+                            var a = i * Math.PI / 60
+                            var major = i % 5 === 0
+
+                            var r1 = major ? 294 : 301
+                            var r2 = major ? 326 : 310
 
                             ctx.beginPath()
                             ctx.moveTo(
@@ -185,47 +214,38 @@ Window {
                             )
 
                             ctx.strokeStyle = major
-                                ? "#9AF5FF" : "#347BAF"
-                            ctx.lineWidth = major ? 2 : 0.8
+                                ? "#A3F5FF" : "#347DAA"
+
+                            ctx.lineWidth = major ? 1.7 : 0.7
                             ctx.stroke()
                         }
 
-                        // PEQUENOS LOSANGOS
-                        for (var j = 0; j < 24; j++) {
-                            var angle = j * Math.PI / 12
-                            var x = cx + Math.cos(angle) * 280
-                            var y = cy + Math.sin(angle) * 280
-
-                            ctx.save()
-                            ctx.translate(x, y)
-                            ctx.rotate(angle)
-
-                            ctx.beginPath()
-                            ctx.moveTo(0, -7)
-                            ctx.lineTo(4, 0)
-                            ctx.lineTo(0, 7)
-                            ctx.lineTo(-4, 0)
-                            ctx.closePath()
-
-                            ctx.strokeStyle = "#9AF5FF"
-                            ctx.lineWidth = 1.2
-                            ctx.stroke()
-
-                            ctx.restore()
-                        }
-
-                        // ARCO SUPERIOR E INFERIOR
-                        for (var k = 0; k < 4; k++) {
-                            var start = k * Math.PI / 2 + 0.18
+                        // ARCOS LUMINOSOS
+                        for (var j = 0; j < 8; j++) {
+                            var start = j * Math.PI / 4
 
                             ctx.beginPath()
                             ctx.arc(
                                 cx, cy, 337,
-                                start, start + 0.38
+                                start + 0.12,
+                                start + 0.43
                             )
-                            ctx.strokeStyle = "#83EFFF"
-                            ctx.lineWidth = 2.5
+
+                            ctx.strokeStyle = "#9BF5FF"
+                            ctx.lineWidth = 2.2
                             ctx.stroke()
+                        }
+
+                        // PEQUENOS PONTOS DE LUZ
+                        for (var k = 0; k < 24; k++) {
+                            var angle = k * Math.PI / 12
+                            var x = cx + Math.cos(angle) * 282
+                            var y = cy + Math.sin(angle) * 282
+
+                            ctx.beginPath()
+                            ctx.arc(x, y, 2, 0, Math.PI * 2)
+                            ctx.fillStyle = "#B9F9FF"
+                            ctx.fill()
                         }
                     }
                 }
@@ -233,21 +253,21 @@ Window {
                 RotationAnimation on rotation {
                     from: 0
                     to: 360
-                    duration: 90000
+                    duration: 100000
                     loops: Animation.Infinite
                 }
             }
 
-            // CIRCULO MEDIO: RUNAS E INSCRICOES
+            // ANEL INTERMEDIARIO
             Item {
-                id: circuloMedio
+                id: anelMedio
 
-                width: 535
-                height: 535
+                width: 510
+                height: 510
                 anchors.centerIn: parent
 
                 opacity: 0
-                scale: 0.65
+                scale: 0.7
 
                 Canvas {
                     anchors.fill: parent
@@ -267,73 +287,71 @@ Window {
                             ctx.stroke()
                         }
 
-                        circle(255, "#4DBCEB", 1.5)
-                        circle(245, "#83EFFF", 0.8)
-                        circle(232, "#286DA9", 1.2)
+                        circle(248, "#4EBDE6", 1.3)
+                        circle(235, "#8CEEFF", 1)
+                        circle(221, "#367BAE", 1)
 
-                        // INSCRICOES ARCANAS FICTICIAS
-                        for (var i = 0; i < 48; i++) {
-                            var a = i * Math.PI / 24
-                            var x = cx + Math.cos(a) * 238
-                            var y = cy + Math.sin(a) * 238
+                        // GEOMETRIA RADIAL
+                        for (var i = 0; i < 12; i++) {
+                            var a = i * Math.PI / 6
 
-                            ctx.save()
-                            ctx.translate(x, y)
-                            ctx.rotate(a + Math.PI / 2)
-
-                            ctx.strokeStyle = i % 3 === 0
-                                ? "#A7F7FF" : "#4B9ECF"
-                            ctx.lineWidth = 1.5
-
-                            ctx.beginPath()
-                            ctx.moveTo(-4, -7)
-                            ctx.lineTo(0, -2)
-                            ctx.lineTo(4, -7)
-                            ctx.moveTo(0, -2)
-                            ctx.lineTo(0, 7)
-                            ctx.moveTo(-4, 4)
-                            ctx.lineTo(4, 4)
-                            ctx.stroke()
-
-                            ctx.restore()
-                        }
-
-                        // GEOMETRIA INTERNA
-                        for (var j = 0; j < 12; j++) {
-                            var angle = j * Math.PI / 6
-
-                            var x1 = cx + Math.cos(angle) * 185
-                            var y1 = cy + Math.sin(angle) * 185
-                            var x2 = cx + Math.cos(angle) * 230
-                            var y2 = cy + Math.sin(angle) * 230
+                            var x1 = cx + Math.cos(a) * 170
+                            var y1 = cy + Math.sin(a) * 170
+                            var x2 = cx + Math.cos(a) * 245
+                            var y2 = cy + Math.sin(a) * 245
 
                             ctx.beginPath()
                             ctx.moveTo(x1, y1)
                             ctx.lineTo(x2, y2)
 
-                            ctx.strokeStyle = "#57C8EF"
+                            ctx.strokeStyle = "#55BFE5"
                             ctx.lineWidth = 1
                             ctx.stroke()
 
-                            // PONTOS DE CONEXAO
                             ctx.beginPath()
                             ctx.arc(x1, y1, 3, 0, Math.PI * 2)
-                            ctx.fillStyle = "#B5FAFF"
+                            ctx.fillStyle = "#B7F9FF"
                             ctx.fill()
                         }
 
                         // ARCOS SEGMENTADOS
-                        for (var k = 0; k < 8; k++) {
-                            var start = k * Math.PI / 4
+                        for (var j = 0; j < 12; j++) {
+                            var start = j * Math.PI / 6
 
                             ctx.beginPath()
                             ctx.arc(
-                                cx, cy, 215,
-                                start, start + 0.32
+                                cx, cy, 205,
+                                start + 0.08,
+                                start + 0.32
                             )
-                            ctx.strokeStyle = "#A0F4FF"
-                            ctx.lineWidth = 3
+
+                            ctx.strokeStyle = "#A3F4FF"
+                            ctx.lineWidth = 2
                             ctx.stroke()
+                        }
+
+                        // PONTAS GEOMETRICAS
+                        for (var k = 0; k < 12; k++) {
+                            var angle = k * Math.PI / 6
+                            var px = cx + Math.cos(angle) * 230
+                            var py = cy + Math.sin(angle) * 230
+
+                            ctx.save()
+                            ctx.translate(px, py)
+                            ctx.rotate(angle)
+
+                            ctx.beginPath()
+                            ctx.moveTo(0, -7)
+                            ctx.lineTo(5, 0)
+                            ctx.lineTo(0, 7)
+                            ctx.lineTo(-5, 0)
+                            ctx.closePath()
+
+                            ctx.strokeStyle = "#A6F7FF"
+                            ctx.lineWidth = 1.3
+                            ctx.stroke()
+
+                            ctx.restore()
                         }
                     }
                 }
@@ -341,21 +359,21 @@ Window {
                 RotationAnimation on rotation {
                     from: 360
                     to: 0
-                    duration: 62000
+                    duration: 72000
                     loops: Animation.Infinite
                 }
             }
 
-            // CIRCULO INTERNO: GEOMETRIA SAGRADA
+            // ANEL INTERNO
             Item {
-                id: circuloInterno
+                id: anelInterno
 
-                width: 380
-                height: 380
+                width: 370
+                height: 370
                 anchors.centerIn: parent
 
                 opacity: 0
-                scale: 0.55
+                scale: 0.6
 
                 Canvas {
                     anchors.fill: parent
@@ -367,7 +385,7 @@ Window {
 
                         ctx.clearRect(0, 0, width, height)
 
-                        function polygon(sides, radius, offset) {
+                        function polygon(sides, radius, offset, color) {
                             ctx.beginPath()
 
                             for (var i = 0; i <= sides; i++) {
@@ -382,40 +400,27 @@ Window {
                             }
 
                             ctx.closePath()
+                            ctx.strokeStyle = color
                             ctx.stroke()
                         }
 
-                        // CIRCULOS DE CONTENCAO
-                        ctx.strokeStyle = "#83EFFF"
-                        ctx.lineWidth = 1.5
-
-                        ctx.beginPath()
-                        ctx.arc(cx, cy, 178, 0, Math.PI * 2)
-                        ctx.stroke()
-
-                        ctx.beginPath()
-                        ctx.arc(cx, cy, 164, 0, Math.PI * 2)
-                        ctx.stroke()
-
-                        // HEXAGONOS E ESTRELAS
-                        ctx.strokeStyle = "#5BD7F7"
                         ctx.lineWidth = 1.3
 
-                        polygon(6, 150, Math.PI / 6)
-                        polygon(6, 150, 0)
-                        polygon(12, 130, Math.PI / 12)
+                        // FORMAS SOBREPOSTAS
+                        polygon(6, 165, 0, "#6ADBF6")
+                        polygon(6, 165, Math.PI / 6, "#A1F5FF")
+                        polygon(12, 140, Math.PI / 12, "#4BAAD6")
+                        polygon(8, 115, 0, "#80E7FA")
 
                         // ESTRELA CENTRAL
-                        ctx.strokeStyle = "#B5FAFF"
-                        ctx.lineWidth = 1.5
-
                         ctx.beginPath()
 
-                        for (var j = 0; j <= 12; j++) {
+                        for (var j = 0; j <= 24; j++) {
                             var r = j % 2 === 0 ? 105 : 48
-                            var angle = j * Math.PI / 6 - Math.PI / 2
-                            var x = cx + Math.cos(angle) * r
-                            var y = cy + Math.sin(angle) * r
+                            var a = j * Math.PI / 12 - Math.PI / 2
+
+                            var x = cx + Math.cos(a) * r
+                            var y = cy + Math.sin(a) * r
 
                             if (j === 0)
                                 ctx.moveTo(x, y)
@@ -424,84 +429,95 @@ Window {
                         }
 
                         ctx.closePath()
+                        ctx.strokeStyle = "#C0FBFF"
+                        ctx.lineWidth = 1.6
                         ctx.stroke()
 
                         // RAIOS INTERNOS
                         for (var k = 0; k < 24; k++) {
-                            var a = k * Math.PI / 12
+                            var angle = k * Math.PI / 12
 
                             ctx.beginPath()
                             ctx.moveTo(
-                                cx + Math.cos(a) * 110,
-                                cy + Math.sin(a) * 110
+                                cx + Math.cos(angle) * 112,
+                                cy + Math.sin(angle) * 112
                             )
                             ctx.lineTo(
-                                cx + Math.cos(a) * 155,
-                                cy + Math.sin(a) * 155
+                                cx + Math.cos(angle) * 155,
+                                cy + Math.sin(angle) * 155
                             )
 
-                            ctx.strokeStyle = "#398FC5"
+                            ctx.strokeStyle = "#418FBE"
                             ctx.lineWidth = 0.8
                             ctx.stroke()
                         }
+
+                        // CIRCULO DE CONTENCAO
+                        ctx.beginPath()
+                        ctx.arc(cx, cy, 178, 0, Math.PI * 2)
+                        ctx.strokeStyle = "#83EFFF"
+                        ctx.lineWidth = 1.4
+                        ctx.stroke()
                     }
                 }
 
                 RotationAnimation on rotation {
                     from: 0
                     to: 360
-                    duration: 38000
+                    duration: 42000
                     loops: Animation.Infinite
                 }
             }
 
-            // PEQUENOS GLIFOS ORBITAIS
+            // PARTICULAS
             Item {
                 id: particulas
+
                 anchors.fill: parent
                 opacity: 0
 
                 RotationAnimation on rotation {
                     from: 0
                     to: 360
-                    duration: 45000
+                    duration: 50000
                     loops: Animation.Infinite
                 }
 
                 Repeater {
-                    model: 48
+                    model: 38
 
                     Item {
-                        property real angulo: index * 7.5
-                        property real distancia: 270 + (index % 3) * 12
-
-                        x: circuloPrincipal.width / 2 +
-                           Math.cos(angulo * Math.PI / 180) * distancia - 7
-
-                        y: circuloPrincipal.height / 2 +
-                           Math.sin(angulo * Math.PI / 180) * distancia - 7
+                        property real angulo: index * 9.47
+                        property real distancia: 245 + (index % 5) * 17
 
                         width: 14
                         height: 14
 
+                        x: 340 +
+                           Math.cos(angulo * Math.PI / 180) * distancia - 7
+
+                        y: 340 +
+                           Math.sin(angulo * Math.PI / 180) * distancia - 7
+
                         Rectangle {
                             anchors.centerIn: parent
-                            width: index % 4 === 0 ? 5 : 2.5
+
+                            width: index % 4 === 0 ? 4 : 2
                             height: width
                             radius: width / 2
-                            color: "#B9F9FF"
+                            color: "#C4FAFF"
 
                             SequentialAnimation on opacity {
                                 loops: Animation.Infinite
 
                                 NumberAnimation {
                                     to: 0.95
-                                    duration: 600 + index * 35
+                                    duration: 700 + index * 35
                                 }
 
                                 NumberAnimation {
-                                    to: 0.18
-                                    duration: 600 + index * 35
+                                    to: 0.12
+                                    duration: 700 + index * 35
                                 }
                             }
                         }
@@ -509,78 +525,110 @@ Window {
                 }
             }
 
-            // NUCLEO DE ENERGIA
+            // NUCLEO ENERGETICO
             Item {
                 id: nucleo
 
-                width: 180
-                height: 180
+                width: 190
+                height: 190
                 anchors.centerIn: parent
 
                 opacity: 0
 
-                // HALO EXTERNO
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 180
-                    height: 180
-                    radius: width / 2
-                    color: "#247FC4"
-                    opacity: 0.07
-                    border.color: "#75E9FF"
-                    border.width: 1
+                // AURA
+                Canvas {
+                    anchors.fill: parent
+
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.clearRect(0, 0, width, height)
+
+                        var grad = ctx.createRadialGradient(
+                            95, 95, 2,
+                            95, 95, 95
+                        )
+
+                        grad.addColorStop(0, "rgba(225,255,255,0.48)")
+                        grad.addColorStop(0.25, "rgba(90,220,255,0.25)")
+                        grad.addColorStop(0.6, "rgba(30,140,220,0.10)")
+                        grad.addColorStop(1, "rgba(10,80,160,0)")
+
+                        ctx.fillStyle = grad
+                        ctx.fillRect(0, 0, width, height)
+                    }
                 }
 
-                // ANEL DE ENERGIA
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 135
-                    height: 135
-                    radius: width / 2
-                    color: "transparent"
-                    border.color: "#5BDFFF"
-                    border.width: 2
-                    opacity: 0.75
-                }
+                // ONDAS DE ENERGIA
+                Repeater {
+                    model: 3
 
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 108
-                    height: 108
-                    radius: width / 2
-                    color: "#0D5A9C"
-                    opacity: 0.25
-                    border.color: "#A5F8FF"
-                    border.width: 1
-                }
+                    Rectangle {
+                        anchors.centerIn: parent
 
-                // ENERGIA CENTRAL
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 68
-                    height: 68
-                    radius: width / 2
+                        width: 45 + index * 24
+                        height: width
+                        radius: width / 2
 
-                    gradient: Gradient {
-                        GradientStop {
-                            position: 0
-                            color: "#F0FFFF"
+                        color: "transparent"
+                        border.color: "#A4F7FF"
+                        border.width: 1.2
+                        opacity: 0.4
+
+                        SequentialAnimation on scale {
+                            loops: Animation.Infinite
+
+                            PauseAnimation {
+                                duration: index * 450
+                            }
+
+                            NumberAnimation {
+                                from: 0.6
+                                to: 1.8
+                                duration: 2300
+                                easing.type: Easing.OutCubic
+                            }
                         }
-                        GradientStop {
-                            position: 0.25
-                            color: "#9BF4FF"
-                        }
-                        GradientStop {
-                            position: 0.65
-                            color: "#39C9F2"
-                        }
-                        GradientStop {
-                            position: 1
-                            color: "#0873B6"
+
+                        SequentialAnimation on opacity {
+                            loops: Animation.Infinite
+
+                            PauseAnimation {
+                                duration: index * 450
+                            }
+
+                            NumberAnimation {
+                                from: 0.65
+                                to: 0
+                                duration: 2300
+                            }
                         }
                     }
+                }
 
-                    opacity: 0.92
+                // LUZ CENTRAL
+                Canvas {
+                    width: 100
+                    height: 100
+                    anchors.centerIn: parent
+
+                    onPaint: {
+                        var ctx = getContext("2d")
+                        ctx.clearRect(0, 0, width, height)
+
+                        var grad = ctx.createRadialGradient(
+                            50, 50, 1,
+                            50, 50, 50
+                        )
+
+                        grad.addColorStop(0, "#FFFFFF")
+                        grad.addColorStop(0.18, "#D9FFFF")
+                        grad.addColorStop(0.42, "#82EFFF")
+                        grad.addColorStop(0.72, "#32C5F0")
+                        grad.addColorStop(1, "rgba(20,120,210,0)")
+
+                        ctx.fillStyle = grad
+                        ctx.fillRect(0, 0, width, height)
+                    }
                 }
 
                 SequentialAnimation on scale {
@@ -588,13 +636,13 @@ Window {
 
                     NumberAnimation {
                         to: 1.07
-                        duration: 1900
+                        duration: 2100
                         easing.type: Easing.InOutSine
                     }
 
                     NumberAnimation {
-                        to: 0.96
-                        duration: 1900
+                        to: 0.94
+                        duration: 2100
                         easing.type: Easing.InOutSine
                     }
                 }
@@ -605,60 +653,60 @@ Window {
         Column {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.top: parent.top
-            anchors.topMargin: 30
+            anchors.topMargin: 28
             spacing: 6
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "E P A M I N"
-                color: "#B8F8FF"
-                font.pixelSize: 21
-                font.letterSpacing: 8
+                color: "#D5FCFF"
+                font.pixelSize: 20
+                font.letterSpacing: 9
                 font.weight: Font.Light
             }
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "SISTEMA ARCANO"
-                color: "#5DB9E1"
-                font.pixelSize: 9
+                text: "MANIFESTAÇÃO"
+                color: "#78C8E5"
+                font.pixelSize: 8
                 font.letterSpacing: 5
             }
         }
 
-        // ESTADO DO SISTEMA
+        // ESTADO
         Column {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 34
-            spacing: 8
+            anchors.bottomMargin: 28
+            spacing: 7
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 text: estado === "INVOCANDO"
-                      ? "DESPERTANDO"
-                      : "AGUARDANDO"
+                    ? "DESPERTANDO"
+                    : "AGUARDANDO"
 
-                color: "#B5F8FF"
-                font.pixelSize: 12
+                color: "#D5FCFF"
+                font.pixelSize: 11
                 font.letterSpacing: 5
             }
 
             Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
-                width: 100
+                width: 72
                 height: 1
-                color: "#5BDFFF"
-                opacity: 0.65
+                color: "#8BEFFF"
+                opacity: 0.7
             }
 
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "EPAMIN"
-                color: "#4A91BD"
-                font.pixelSize: 9
-                font.letterSpacing: 4
+                color: "#5799BC"
+                font.pixelSize: 8
+                font.letterSpacing: 5
             }
         }
     }
