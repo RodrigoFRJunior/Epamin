@@ -12,6 +12,7 @@ AUDIOS = {
     "aulas": "aulas.mp3",
     "nao_entendi": "nao_entendi.mp3",
     "encerramento": "encerramento.mp3",
+    "modo_espera": "modo_espera.mp3",
 }
 
 

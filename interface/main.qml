@@ -6,7 +6,41 @@ Window {
     id: janela
 
     visible: false
+
     property bool epaminAtivo: false
+    property string estadoEpamin: "repouso"
+
+    // ==========================================
+    // CORES DOS ESTADOS
+    // ==========================================
+
+    property color corEstado:
+        estadoEpamin === "ativacao" ? "#B8F5FF" :
+        estadoEpamin === "escuta" ? "#00D9F5" :
+        estadoEpamin === "execucao" ? "#9B8AFF" :
+        "#8CEEFF"
+
+    property real intensidadeEstado:
+        estadoEpamin === "execucao" ? 0.16 :
+        estadoEpamin === "escuta" ? 0.12 :
+        estadoEpamin === "ativacao" ? 0.10 : 0.0
+
+    // Transição suave das cores
+    Behavior on corEstado {
+        ColorAnimation {
+            duration: 1000
+            easing.type: Easing.InOutSine
+        }
+    }
+
+    // Transição suave da iluminação
+    Behavior on intensidadeEstado {
+        NumberAnimation {
+            duration: 1000
+            easing.type: Easing.InOutSine
+        }
+    }
+
     visibility: Window.FullScreen
     color: "transparent"
 
@@ -16,32 +50,54 @@ Window {
 
     title: "Epamin"
 
+    // ==========================================
+    // CONTROLE DE ATIVACAO
+    // ==========================================
+
     onEpaminAtivoChanged: {
-    if (epaminAtivo) {
-        visible = true
-        invocacao.restart()
-    } else {
-        invocacao.stop()
-        visible = false
+
+        if (epaminAtivo) {
+
+            desmaterializacao.stop()
+
+            cena.opacity = 1
+            sistema.scale = 1
+
+            visible = true
+
+            estadoEpamin = "ativacao"
+
+            invocacao.restart()
+
+        } else {
+
+            estadoEpamin = "repouso"
+
+            invocacao.stop()
+            desmaterializacao.restart()
+        }
     }
-}
 
     Shortcut {
         sequence: "Escape"
         onActivated: Qt.quit()
     }
 
+    // ==========================================
     // INVOCACAO PROGRESSIVA
+    // ==========================================
+
     SequentialAnimation {
         id: invocacao
 
         ParallelAnimation {
+
             NumberAnimation {
                 target: anelExterno
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 1200
+                duration: 450
             }
 
             NumberAnimation {
@@ -49,20 +105,23 @@ Window {
                 property: "scale"
                 from: 0.75
                 to: 1
-                duration: 1500
+                duration: 500
                 easing.type: Easing.OutCubic
             }
         }
 
-        PauseAnimation { duration: 200 }
+        PauseAnimation {
+            duration: 80
+        }
 
         ParallelAnimation {
+
             NumberAnimation {
                 target: anelMedio
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 900
+                duration: 350
             }
 
             NumberAnimation {
@@ -70,20 +129,23 @@ Window {
                 property: "scale"
                 from: 0.7
                 to: 1
-                duration: 1100
+                duration: 400
                 easing.type: Easing.OutBack
             }
         }
 
-        PauseAnimation { duration: 200 }
+        PauseAnimation {
+            duration: 80
+        }
 
         ParallelAnimation {
+
             NumberAnimation {
                 target: anelInterno
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 850
+                duration: 350
             }
 
             NumberAnimation {
@@ -91,20 +153,23 @@ Window {
                 property: "scale"
                 from: 0.6
                 to: 1
-                duration: 1000
+                duration: 400
                 easing.type: Easing.OutBack
             }
         }
 
-        PauseAnimation { duration: 250 }
+        PauseAnimation {
+            duration: 100
+        }
 
         ParallelAnimation {
+
             NumberAnimation {
                 target: particulas
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 1000
+                duration: 500
             }
 
             NumberAnimation {
@@ -112,7 +177,7 @@ Window {
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 1200
+                duration: 500
             }
 
             NumberAnimation {
@@ -120,19 +185,56 @@ Window {
                 property: "scale"
                 from: 0.2
                 to: 1
-                duration: 1400
+                duration: 500
                 easing.type: Easing.OutCubic
             }
         }
     }
 
+    // ==========================================
+    // DESMATERIALIZACAO
+    // ==========================================
 
+    ParallelAnimation {
+        id: desmaterializacao
+
+        NumberAnimation {
+            target: cena
+            property: "opacity"
+            to: 0
+            duration: 450
+            easing.type: Easing.InCubic
+        }
+
+        NumberAnimation {
+            target: sistema
+            property: "scale"
+            to: 0.88
+            duration: 450
+            easing.type: Easing.InCubic
+        }
+
+        onFinished: {
+            if (!janela.epaminAtivo) {
+                janela.visible = false
+            }
+        }
+    }
+
+    // ==========================================
+    // CENA PRINCIPAL
+    // ==========================================
 
     Item {
         id: cena
-        anchors.fill: parent
 
+        anchors.fill: parent
+        opacity: 1
+
+        // ======================================
         // FUNDO ESCURO TRANSLUCIDO
+        // ======================================
+
         Rectangle {
             anchors.fill: parent
             color: "#99030A16"
@@ -141,6 +243,7 @@ Window {
                 anchors.fill: parent
 
                 gradient: Gradient {
+
                     GradientStop {
                         position: 0
                         color: "#33020A18"
@@ -159,7 +262,10 @@ Window {
             }
         }
 
+        // ======================================
         // SELO CENTRAL
+        // ======================================
+
         Item {
             id: sistema
 
@@ -167,7 +273,12 @@ Window {
             height: 680
             anchors.centerIn: parent
 
+            scale: 1
+
+            // ==================================
             // ANEL EXTERNO
+            // ==================================
+
             Item {
                 id: anelExterno
 
@@ -179,6 +290,7 @@ Window {
                     anchors.fill: parent
 
                     onPaint: {
+
                         var ctx = getContext("2d")
                         var cx = width / 2
                         var cy = height / 2
@@ -199,7 +311,9 @@ Window {
                         circle(294, "#63CDEB", 1.2)
 
                         // MARCACOES GEOMETRICAS
+
                         for (var i = 0; i < 120; i++) {
+
                             var a = i * Math.PI / 60
                             var major = i % 5 === 0
 
@@ -207,10 +321,12 @@ Window {
                             var r2 = major ? 326 : 310
 
                             ctx.beginPath()
+
                             ctx.moveTo(
                                 cx + Math.cos(a) * r1,
                                 cy + Math.sin(a) * r1
                             )
+
                             ctx.lineTo(
                                 cx + Math.cos(a) * r2,
                                 cy + Math.sin(a) * r2
@@ -224,10 +340,13 @@ Window {
                         }
 
                         // ARCOS LUMINOSOS
+
                         for (var j = 0; j < 8; j++) {
+
                             var start = j * Math.PI / 4
 
                             ctx.beginPath()
+
                             ctx.arc(
                                 cx, cy, 337,
                                 start + 0.12,
@@ -240,29 +359,42 @@ Window {
                         }
 
                         // PEQUENOS PONTOS DE LUZ
+
                         for (var k = 0; k < 24; k++) {
+
                             var angle = k * Math.PI / 12
                             var x = cx + Math.cos(angle) * 282
                             var y = cy + Math.sin(angle) * 282
 
                             ctx.beginPath()
                             ctx.arc(x, y, 2, 0, Math.PI * 2)
+
                             ctx.fillStyle = "#B9F9FF"
                             ctx.fill()
                         }
                     }
                 }
 
-               RotationAnimation on rotation {
-                running: janela.visible
-                from: 0
-                to: 360
-                duration: 100000
-                loops: Animation.Infinite
-            }
+                // ROTACAO CONTINUA
+
+                RotationAnimation on rotation {
+                    id: rotacaoExterna
+
+                    running: janela.visible
+
+                    from: 0
+                    to: 360
+
+                    duration: 100000
+
+                    loops: Animation.Infinite
+                }
             }
 
+            // ==================================
             // ANEL INTERMEDIARIO
+            // ==================================
+
             Item {
                 id: anelMedio
 
@@ -277,6 +409,7 @@ Window {
                     anchors.fill: parent
 
                     onPaint: {
+
                         var ctx = getContext("2d")
                         var cx = width / 2
                         var cy = height / 2
@@ -284,8 +417,10 @@ Window {
                         ctx.clearRect(0, 0, width, height)
 
                         function circle(r, color, line) {
+
                             ctx.beginPath()
                             ctx.arc(cx, cy, r, 0, Math.PI * 2)
+
                             ctx.strokeStyle = color
                             ctx.lineWidth = line
                             ctx.stroke()
@@ -296,11 +431,14 @@ Window {
                         circle(221, "#367BAE", 1)
 
                         // GEOMETRIA RADIAL
+
                         for (var i = 0; i < 12; i++) {
+
                             var a = i * Math.PI / 6
 
                             var x1 = cx + Math.cos(a) * 170
                             var y1 = cy + Math.sin(a) * 170
+
                             var x2 = cx + Math.cos(a) * 245
                             var y2 = cy + Math.sin(a) * 245
 
@@ -314,15 +452,19 @@ Window {
 
                             ctx.beginPath()
                             ctx.arc(x1, y1, 3, 0, Math.PI * 2)
+
                             ctx.fillStyle = "#B7F9FF"
                             ctx.fill()
                         }
 
                         // ARCOS SEGMENTADOS
+
                         for (var j = 0; j < 12; j++) {
+
                             var start = j * Math.PI / 6
 
                             ctx.beginPath()
+
                             ctx.arc(
                                 cx, cy, 205,
                                 start + 0.08,
@@ -335,8 +477,11 @@ Window {
                         }
 
                         // PONTAS GEOMETRICAS
+
                         for (var k = 0; k < 12; k++) {
+
                             var angle = k * Math.PI / 6
+
                             var px = cx + Math.cos(angle) * 230
                             var py = cy + Math.sin(angle) * 230
 
@@ -360,16 +505,26 @@ Window {
                     }
                 }
 
+                // ROTACAO CONTINUA
+
                 RotationAnimation on rotation {
+                    id: rotacaoMedia
+
                     running: janela.visible
+
                     from: 360
                     to: 0
+
                     duration: 72000
+
                     loops: Animation.Infinite
                 }
             }
 
+            // ==================================
             // ANEL INTERNO
+            // ==================================
+
             Item {
                 id: anelInterno
 
@@ -384,6 +539,7 @@ Window {
                     anchors.fill: parent
 
                     onPaint: {
+
                         var ctx = getContext("2d")
                         var cx = width / 2
                         var cy = height / 2
@@ -391,10 +547,13 @@ Window {
                         ctx.clearRect(0, 0, width, height)
 
                         function polygon(sides, radius, offset, color) {
+
                             ctx.beginPath()
 
                             for (var i = 0; i <= sides; i++) {
+
                                 var a = i * Math.PI * 2 / sides + offset
+
                                 var x = cx + Math.cos(a) * radius
                                 var y = cy + Math.sin(a) * radius
 
@@ -412,15 +571,18 @@ Window {
                         ctx.lineWidth = 1.3
 
                         // FORMAS SOBREPOSTAS
+
                         polygon(6, 165, 0, "#6ADBF6")
                         polygon(6, 165, Math.PI / 6, "#A1F5FF")
                         polygon(12, 140, Math.PI / 12, "#4BAAD6")
                         polygon(8, 115, 0, "#80E7FA")
 
                         // ESTRELA CENTRAL
+
                         ctx.beginPath()
 
                         for (var j = 0; j <= 24; j++) {
+
                             var r = j % 2 === 0 ? 105 : 48
                             var a = j * Math.PI / 12 - Math.PI / 2
 
@@ -434,19 +596,24 @@ Window {
                         }
 
                         ctx.closePath()
+
                         ctx.strokeStyle = "#C0FBFF"
                         ctx.lineWidth = 1.6
                         ctx.stroke()
 
                         // RAIOS INTERNOS
+
                         for (var k = 0; k < 24; k++) {
+
                             var angle = k * Math.PI / 12
 
                             ctx.beginPath()
+
                             ctx.moveTo(
                                 cx + Math.cos(angle) * 112,
                                 cy + Math.sin(angle) * 112
                             )
+
                             ctx.lineTo(
                                 cx + Math.cos(angle) * 155,
                                 cy + Math.sin(angle) * 155
@@ -458,24 +625,36 @@ Window {
                         }
 
                         // CIRCULO DE CONTENCAO
+
                         ctx.beginPath()
                         ctx.arc(cx, cy, 178, 0, Math.PI * 2)
+
                         ctx.strokeStyle = "#83EFFF"
                         ctx.lineWidth = 1.4
                         ctx.stroke()
                     }
                 }
 
+                // ROTACAO CONTINUA
+
                 RotationAnimation on rotation {
+                    id: rotacaoInterna
+
                     running: janela.visible
+
                     from: 0
                     to: 360
+
                     duration: 42000
+
                     loops: Animation.Infinite
                 }
             }
 
+            // ==================================
             // PARTICULAS
+            // ==================================
+
             Item {
                 id: particulas
 
@@ -483,10 +662,14 @@ Window {
                 opacity: 0
 
                 RotationAnimation on rotation {
+
                     running: janela.visible
+
                     from: 0
                     to: 360
+
                     duration: 50000
+
                     loops: Animation.Infinite
                 }
 
@@ -494,6 +677,7 @@ Window {
                     model: 38
 
                     Item {
+
                         property real angulo: index * 9.47
                         property real distancia: 245 + (index % 5) * 17
 
@@ -512,9 +696,12 @@ Window {
                             width: index % 4 === 0 ? 4 : 2
                             height: width
                             radius: width / 2
-                            color: "#C4FAFF"
+
+                            color: janela.corEstado
 
                             SequentialAnimation on opacity {
+
+                                running: janela.visible
                                 loops: Animation.Infinite
 
                                 NumberAnimation {
@@ -532,7 +719,10 @@ Window {
                 }
             }
 
+            // ==================================
             // NUCLEO ENERGETICO
+            // ==================================
+
             Item {
                 id: nucleo
 
@@ -543,11 +733,14 @@ Window {
                 opacity: 0
 
                 // AURA
+
                 Canvas {
                     anchors.fill: parent
 
                     onPaint: {
+
                         var ctx = getContext("2d")
+
                         ctx.clearRect(0, 0, width, height)
 
                         var grad = ctx.createRadialGradient(
@@ -566,6 +759,7 @@ Window {
                 }
 
                 // ONDAS DE ENERGIA
+
                 Repeater {
                     model: 3
 
@@ -574,14 +768,19 @@ Window {
 
                         width: 45 + index * 24
                         height: width
+
                         radius: width / 2
 
                         color: "transparent"
-                        border.color: "#A4F7FF"
+
+                        border.color: janela.corEstado
                         border.width: 1.2
+
                         opacity: 0.4
 
                         SequentialAnimation on scale {
+
+                            running: janela.visible
                             loops: Animation.Infinite
 
                             PauseAnimation {
@@ -597,6 +796,8 @@ Window {
                         }
 
                         SequentialAnimation on opacity {
+
+                            running: janela.visible
                             loops: Animation.Infinite
 
                             PauseAnimation {
@@ -613,13 +814,16 @@ Window {
                 }
 
                 // LUZ CENTRAL
+
                 Canvas {
                     width: 100
                     height: 100
                     anchors.centerIn: parent
 
                     onPaint: {
+
                         var ctx = getContext("2d")
+
                         ctx.clearRect(0, 0, width, height)
 
                         var grad = ctx.createRadialGradient(
@@ -638,21 +842,57 @@ Window {
                     }
                 }
 
+                // PULSACAO DO NUCLEO
+
                 SequentialAnimation on scale {
+                    id: pulsacaoNucleo
+
+                    running: janela.visible
                     loops: Animation.Infinite
 
                     NumberAnimation {
-                        to: 1.07
-                        duration: 2100
+
+                        to:
+                            janela.estadoEpamin === "execucao" ? 1.14 :
+                            janela.estadoEpamin === "escuta" ? 1.08 :
+                            1.04
+
+                        duration:
+                            janela.estadoEpamin === "execucao" ? 650 :
+                            1800
+
                         easing.type: Easing.InOutSine
                     }
 
                     NumberAnimation {
-                        to: 0.94
-                        duration: 2100
+
+                        to:
+                            janela.estadoEpamin === "execucao" ? 0.94 :
+                            janela.estadoEpamin === "escuta" ? 0.96 :
+                            0.98
+
+                        duration:
+                            janela.estadoEpamin === "execucao" ? 650 :
+                            1800
+
                         easing.type: Easing.InOutSine
                     }
                 }
+            }
+
+            // ==================================
+            // ILUMINACAO DINAMICA DOS ESTADOS
+            // ==================================
+
+            Rectangle {
+                anchors.fill: parent
+
+                radius: width / 2
+
+                color: janela.corEstado
+                opacity: janela.intensidadeEstado
+
+                z: 10
             }
         }
     }
