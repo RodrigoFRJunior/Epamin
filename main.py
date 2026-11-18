@@ -2,15 +2,22 @@
 import subprocess
 import webbrowser
 import sys
+import threading
 
 from pathlib import Path
 
-from PySide6.QtCore import QUrl, QThread, Signal, Slot
+from PySide6.QtCore import (
+    QUrl,
+    QThread,
+    Signal,
+    Slot,
+    QObject
+)
 from PySide6.QtGui import QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtCore import QObject
 
 from teste_voz import ouvir
+from sistema.audio import reproduzir
 from interface.app import aplicar_blur_windows
 
 
@@ -36,27 +43,45 @@ def abrir_paint():
 
 
 def executar_comando(comando):
+
     match comando:
         case "abrir calculadora" | "calculadora":
             abrir_calculadora()
+            return "calculadora", True
 
         case "abrir jorge" | "jorge":
             abrir_paint()
+            return "paint", True
 
         case "aulas":
             abrir_plano_aula()
+            return "aulas", True
 
         case "sair" | "tchau":
             print("Até logo!")
-            return False
+            return "encerramento", False
 
         case "":
             print("Não consegui entender o comando.")
+            return "nao_entendi", True
 
         case _:
             print("Ainda não conheço esse comando.")
+            return "nao_entendi", True
 
-    return True
+
+# ==========================================
+# SISTEMA DE REPRODUÇÃO
+# ==========================================
+
+class FalaEpamin(QThread):
+
+    def __init__(self, audio):
+        super().__init__()
+        self.audio = audio
+
+    def run(self):
+        reproduzir(self.audio)
 
 
 # ==========================================
@@ -74,10 +99,25 @@ class EscutaEpamin(QThread):
 
     def __init__(self):
         super().__init__()
+
         self.executando = True
+        self.liberacao = threading.Event()
 
     def parar(self):
         self.executando = False
+        self.liberacao.set()
+
+    def liberar_escuta(self):
+        self.liberacao.set()
+
+    def aguardar_liberacao(self):
+
+        while self.executando:
+
+            if self.liberacao.wait(timeout=0.1):
+                return True
+
+        return False
 
     def run(self):
 
@@ -96,7 +136,14 @@ class EscutaEpamin(QThread):
 
                     print("Epamin ativado!")
 
+                    self.liberacao.clear()
                     self.ativado.emit()
+
+                    if not self.aguardar_liberacao():
+                        break
+
+                    if not self.executando:
+                        break
 
                     print("Diga seu comando.")
 
@@ -105,7 +152,14 @@ class EscutaEpamin(QThread):
                     if not self.executando:
                         break
 
+                    self.liberacao.clear()
                     self.comando_recebido.emit(comando)
+
+                    if not self.aguardar_liberacao():
+                        break
+
+                    if not self.executando:
+                        break
 
                     if comando in ("sair", "tchau"):
                         break
@@ -130,27 +184,77 @@ class Controlador(QObject):
         self.aplicativo = aplicativo
         self.escuta = escuta
 
+        self.fala_thread = None
+        self.proxima_acao = None
+
+    def iniciar_fala(self, audio, proxima_acao):
+
+        self.proxima_acao = proxima_acao
+
+        self.fala_thread = FalaEpamin(audio)
+
+        self.fala_thread.finished.connect(
+            self.finalizar_fala
+        )
+
+        self.fala_thread.start()
+
     @Slot()
     def ativar(self):
+
         print("Manifestando interface...")
+
         self.janela.setProperty("epaminAtivo", True)
+
+        self.iniciar_fala(
+            "ativacao",
+            "continuar"
+        )
 
     @Slot(str)
     def processar_comando(self, comando):
 
         print(f"Comando recebido: {comando}")
 
-        continuar = executar_comando(comando)
+        audio, continuar = executar_comando(comando)
 
-        # Esconde a interface depois de processar
-        self.janela.setProperty("epaminAtivo", False)
+        if continuar:
+            proxima_acao = "voltar_espera"
+        else:
+            proxima_acao = "encerrar"
 
-        if not continuar:
+        self.iniciar_fala(audio, proxima_acao)
+
+    @Slot()
+    def finalizar_fala(self):
+
+        acao = self.proxima_acao
+
+        self.proxima_acao = None
+        self.fala_thread = None
+
+        if acao == "continuar":
+
+            # A saudação terminou.
+            # Agora podemos ouvir o comando.
+            self.escuta.liberar_escuta()
+
+        elif acao == "voltar_espera":
+
+            self.janela.setProperty("epaminAtivo", False)
+
+            self.escuta.liberar_escuta()
+
+        elif acao == "encerrar":
+
+            self.janela.setProperty("epaminAtivo", False)
+
             self.escuta.parar()
             self.aplicativo.quit()
 
     @Slot(str)
     def mostrar_erro(self, mensagem):
+
         print(f"Erro no sistema de escuta: {mensagem}")
 
 
@@ -190,10 +294,14 @@ def iniciar_epamin():
     )
 
     escuta.ativado.connect(controlador.ativar)
+
     escuta.comando_recebido.connect(
         controlador.processar_comando
     )
-    escuta.erro.connect(controlador.mostrar_erro)
+
+    escuta.erro.connect(
+        controlador.mostrar_erro
+    )
 
     escuta.start()
 
